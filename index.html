@@ -1,0 +1,26 @@
+<h1>Audio file format convert base on ffmpeg</h1>
+
+<input id="fileupload" type="file" name="fileupload" />
+
+<label for="format">Choose a format:</label>
+<select name="format" id="format">
+    <option value="mp3">mp3</option>
+    <option value="wav">wav</option>
+</select>
+
+<button id="upload-button" onclick="uploadFile()"> Convert </button>
+
+<script>
+    async function uploadFile() {
+        let format = document.getElementById("format").value;
+        let formData = new FormData();
+        formData.append("file", fileupload.files[0]);
+        formData.append("format", format)
+        const resp = await fetch('/upload', {
+            method: "POST",
+            body: formData
+        });
+        const text = await resp.text();
+        window.location=text
+    }
+</script>
