@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/LinuxSuRen/go-ffmpeg/branch/master/graph/badge.svg?token=mnFyeD2IQ7)](https://codecov.io/gh/LinuxSuRen/go-ffmpeg)
+
 Audio format convert
 
 ## Get started

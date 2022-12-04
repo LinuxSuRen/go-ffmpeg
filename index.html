@@ -10,6 +10,10 @@
 
 <button id="upload-button" onclick="uploadFile()"> Convert </button>
 
+<div id="download">
+    <span id="status"></span>
+</div>
+
 <script>
     async function uploadFile() {
         let format = document.getElementById("format").value;
@@ -21,6 +25,26 @@
             body: formData
         });
         const text = await resp.text();
-        window.location=text
+        queryTask(text);
+    }
+
+    function queryTask(id) {
+        fetch('/queryTask?id='+id)
+            .then(res => res.json())
+            .then(out => {
+                if(out.Output && out.Output!=="") {
+                    document.getElementById('status').innerText = 'finished'
+
+                    let but = document.createElement('button')
+                    but.innerText = 'Download ' + out.TargetFile
+                    but.onclick = function () {
+                        window.location = '/download?file=' + out.TargetFile
+                    }
+                    document.getElementById('download').append(but)
+                } else {
+                    document.getElementById('status').innerText = 'downloading'
+                    window.setTimeout(queryTask, 2000, id)
+                }
+            })
     }
 </script>
