@@ -6,11 +6,12 @@ COPY go.sum go.sum
 COPY main.go main.go
 COPY index.html index.html
 COPY sources.list sources.list
+COPY pkg/ pkg/
 RUN go build -o go-ffmpeg .
 
 FROM ubuntu:20.04
 
-COPY --from=builder /ws/sources.list /etc/apt/sources.list
+#COPY --from=builder /ws/sources.list /etc/apt/sources.list
 
 RUN apt update -y && \
     apt install ffmpeg -y

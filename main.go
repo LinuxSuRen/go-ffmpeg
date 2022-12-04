@@ -3,20 +3,30 @@ package main
 import (
 	"fmt"
 	restful "github.com/emicklei/go-restful/v3"
+	"github.com/linuxsuren/go-ffmpeg/pkg/executor"
+	"github.com/linuxsuren/go-ffmpeg/pkg/memory_store"
+	"github.com/linuxsuren/go-ffmpeg/pkg/store"
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
-	"path"
-	"strings"
 )
+
+var pool *executor.Pool
+var simpleStore store.Store
 
 func main() {
 	ws := new(restful.WebService)
 
+	pool = &executor.Pool{}
+	defer pool.Close()
+	pool.Run()
+
+	simpleStore = &memory_store.SimpleStore{}
+
 	ws.Route(ws.GET("/").To(indexFile))
 	ws.Route(ws.POST("/upload").To(upload))
 	ws.Route(ws.GET("/download").To(download))
+	ws.Route(ws.GET("/queryTask").To(queryTask))
 
 	restful.Add(ws)
 	fmt.Println("start in port 8080")
@@ -41,6 +51,12 @@ func download(req *restful.Request, resp *restful.Response) {
 	io.Copy(w, ff)
 }
 
+func queryTask(req *restful.Request, resp *restful.Response) {
+	id := req.QueryParameter("id")
+	task := simpleStore.Get(id)
+	resp.WriteAsJson(task)
+}
+
 func upload(req *restful.Request, resp *restful.Response) {
 	r := req.Request
 	format := "." + r.FormValue("format")
@@ -48,16 +64,23 @@ func upload(req *restful.Request, resp *restful.Response) {
 
 	// source and target file
 	sourceFile := header.Filename
-	targetFile := strings.ReplaceAll(sourceFile, path.Ext(sourceFile), format)
+	//targetFile := strings.ReplaceAll(sourceFile, path.Ext(sourceFile), format)
 
 	f, _ := os.OpenFile(sourceFile, os.O_WRONLY|os.O_CREATE, 0666)
 	io.Copy(f, file)
 
-	fmt.Println("start to convert")
-	out, _ := exec.Command("ffmpeg",
-		strings.Split(fmt.Sprintf("-i %s -acodec libmp3lame -ab 256k %s -y", sourceFile, targetFile), " ")...).CombinedOutput()
-	fmt.Println(string(out))
+	task := &store.Task{
+		Filename:     sourceFile,
+		TargetFormat: format,
+	}
+	id := simpleStore.Save(task)
+	pool.Submit(task)
 
-	fmt.Println("done with convert")
-	resp.Write([]byte(fmt.Sprintf("/download?file=%s", targetFile)))
+	fmt.Printf("task [%s] has created\n", id)
+	//out, _ := exec.Command("ffmpeg",
+	//	strings.Split(fmt.Sprintf("-i %s -hide_banner -acodec libmp3lame -ab 256k %s -y", sourceFile, targetFile), " ")...).CombinedOutput()
+	//fmt.Println(string(out))
+	//
+	//fmt.Println("done with convert")
+	resp.Write([]byte(id))
 }
