@@ -9,12 +9,11 @@ import (
 func TestPool(t *testing.T) {
 	pool := &Pool{}
 	defer pool.Close()
-	pool.Run()
-	pool.Run()
-	pool.Run()
+	for i := 0; i < 3; i++ {
+		pool.Run()
+	}
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	pool.Submit(&store.Task{})
-
-	time.Sleep(10 * time.Second)
+	time.Sleep(2 * time.Second)
 }

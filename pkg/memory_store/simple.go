@@ -23,9 +23,6 @@ func (s *SimpleStore) Get(id string) (task *store.Task) {
 	task = s.data[id]
 	return
 }
-func (s *SimpleStore) GetByName(name string) (task *store.Task) {
-	return
-}
 
 func init() {
 	rand.Seed(time.Now().UnixNano())

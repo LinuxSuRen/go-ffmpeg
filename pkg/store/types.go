@@ -14,5 +14,4 @@ type Task struct {
 type Store interface {
 	Save(task *Task) string
 	Get(id string) *Task
-	GetByName(name string) *Task
 }
