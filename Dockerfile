@@ -7,7 +7,7 @@ COPY main.go main.go
 COPY index.html index.html
 COPY sources.list sources.list
 COPY pkg/ pkg/
-RUN go build -o go-ffmpeg .
+RUN GOPROXY=${GOPROXY} go build -o go-ffmpeg .
 
 FROM ubuntu:20.04
 
