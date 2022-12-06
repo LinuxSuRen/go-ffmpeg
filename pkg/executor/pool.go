@@ -58,9 +58,15 @@ func (p *Pool) runTask(task *store.Task) (err error) {
 		return
 	}
 
-	subCmds := fmt.Sprintf("-i %s -hide_banner -acodec libmp3lame -ab 256k %s -y", sourceFile, targetFile)
-
-	cmd := exec.Command("ffmpeg", strings.Split(subCmds, " ")...)
+	var cmd *exec.Cmd
+	switch task.TargetFormat {
+	case "mp3", "mp4", "mkv", "wav":
+		subCmds := fmt.Sprintf("-i %s -hide_banner -acodec libmp3lame -ab 256k %s -y", sourceFile, targetFile)
+		cmd = exec.Command("ffmpeg", strings.Split(subCmds, " ")...)
+	case "pdf":
+		subCmds := fmt.Sprintf("%s -o %s", sourceFile, targetFile)
+		cmd = exec.Command("img2pdf", strings.Split(subCmds, " ")...)
+	}
 
 	task.Command = cmd.String()
 	task.Output, err = cmd.CombinedOutput()
