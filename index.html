@@ -11,8 +11,18 @@
     <option value="pdf">pdf</option>
 </select>
 
+<br/>
+From: <input name="beginTime" id="beginTime" placeholder="00:00:00"/>
+End: <input name="endTime" id="endTime" placeholder="00:00:00"/>
+
+<br/>
+Width: <input id="width" value="0"/>
+Height: <input id="height" value="0"/>
+
+<br/>
 <button id="upload-button" onclick="uploadFile()"> Convert </button>
 
+<div id="info"></div>
 <div id="download">
     <span id="status"></span>
 </div>
@@ -20,9 +30,18 @@
 <script>
     async function uploadFile() {
         let format = document.getElementById("format").value;
+        let beginTime = document.getElementById("beginTime").value;
+        let endTime = document.getElementById("endTime").value;
+        let width = document.getElementById("width").value;
+        let height = document.getElementById("height").value;
         let formData = new FormData();
+
         formData.append("file", fileupload.files[0]);
         formData.append("format", format)
+        formData.append("beginTime", beginTime)
+        formData.append("endTime", endTime)
+        formData.append("width", width)
+        formData.append("height", height)
         const resp = await fetch('/upload', {
             method: "POST",
             body: formData
@@ -48,6 +67,7 @@
                     document.getElementById('status').innerText = 'downloading'
                     window.setTimeout(queryTask, 2000, id)
                 }
+                document.getElementById('info').innerText = out.Info
             })
     }
 </script>

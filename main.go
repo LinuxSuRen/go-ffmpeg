@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 var pool *executor.Pool
@@ -64,7 +65,6 @@ func upload(req *restful.Request, resp *restful.Response) {
 
 	// source and target file
 	sourceFile := header.Filename
-	//targetFile := strings.ReplaceAll(sourceFile, path.Ext(sourceFile), format)
 
 	f, _ := os.OpenFile(sourceFile, os.O_WRONLY|os.O_CREATE, 0666)
 	io.Copy(f, file)
@@ -72,15 +72,15 @@ func upload(req *restful.Request, resp *restful.Response) {
 	task := &store.Task{
 		Filename:     sourceFile,
 		TargetFormat: format,
+		BeginTime:    r.FormValue("beginTime"),
+		EndTime:      r.FormValue("endTime"),
 	}
+	task.TargetWidth, _ = strconv.Atoi(r.FormValue("width"))
+	task.TargetHeight, _ = strconv.Atoi(r.FormValue("height"))
+
 	id := simpleStore.Save(task)
 	pool.Submit(task)
 
 	fmt.Printf("task [%s] has created\n", id)
-	//out, _ := exec.Command("ffmpeg",
-	//	strings.Split(fmt.Sprintf("-i %s -hide_banner -acodec libmp3lame -ab 256k %s -y", sourceFile, targetFile), " ")...).CombinedOutput()
-	//fmt.Println(string(out))
-	//
-	//fmt.Println("done with convert")
 	resp.Write([]byte(id))
 }
