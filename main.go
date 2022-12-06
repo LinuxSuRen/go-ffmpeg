@@ -59,7 +59,7 @@ func queryTask(req *restful.Request, resp *restful.Response) {
 
 func upload(req *restful.Request, resp *restful.Response) {
 	r := req.Request
-	format := "." + r.FormValue("format")
+	format := r.FormValue("format")
 	file, header, _ := r.FormFile("file")
 
 	// source and target file

@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  token: <your-token> # request your token from https://ngrok.com/
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: ngrok

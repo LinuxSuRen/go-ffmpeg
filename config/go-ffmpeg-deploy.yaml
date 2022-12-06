@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: go-ffmpeg
+  name: go-ffmpeg
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-ffmpeg
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: go-ffmpeg
+    spec:
+      containers:
+      - image: registry.aliyuncs.com/surenpi/go-ffmpeg:master
+        name: go-ffmpeg
+        resources: {}
+      - name: ngrok
+        image: ngrok/ngrok:3.1.0-alpine@sha256:0e09f9b9226a59aea3649df3010df0cf65e8d89adf73f1fc9d492224cbab07b0
+        args:
+        - http
+        - "8080"
+        env:
+        - name: NGROK_AUTHTOKEN
+          valueFrom:
+            configMapKeyRef:
+              key: token
+              name: ngrok
+status: {}

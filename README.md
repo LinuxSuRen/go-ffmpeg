@@ -18,4 +18,4 @@ http://localhost:8080
 
 ## Other images
 
-* `registry.cn-hangzhou.aliyuncs.com/surenpi/go-ffmpeg:master`
+* `registry.aliyuncs.com/surenpi/go-ffmpeg:master`
