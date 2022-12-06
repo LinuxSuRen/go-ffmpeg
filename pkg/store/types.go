@@ -9,6 +9,7 @@ type Task struct {
 	Command      string
 	Output       []byte
 	Retry        int
+	DryRun       bool
 }
 
 type Store interface {

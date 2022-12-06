@@ -7,3 +7,5 @@ image-run: image
 	docker run --rm -p 8080:8080 ghcr.io/linuxsuren/go-ffmpeg
 image-run-with-proxy: image-with-proxy
 	docker run --rm -p 8080:8080 ghcr.io/linuxsuren/go-ffmpeg
+pre-commit:
+	go test ./...

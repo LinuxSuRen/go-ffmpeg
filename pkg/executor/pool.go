@@ -10,9 +10,10 @@ import (
 )
 
 type Pool struct {
-	one   sync.Once
-	ch    chan *store.Task
-	quite chan struct{}
+	one      sync.Once
+	ch       chan *store.Task
+	quite    chan struct{}
+	listener map[string]func(task *store.Task)
 }
 
 func (p *Pool) Submit(task *store.Task) {
@@ -23,11 +24,16 @@ func (p *Pool) Close() {
 	p.quite <- struct{}{}
 }
 
+func (p *Pool) On(filename string, callback func(task *store.Task)) {
+	p.listener[filename] = callback
+}
+
 func (p *Pool) Run() {
 	go p.one.Do(func() {
 		fmt.Println("task pool started")
 		p.ch = make(chan *store.Task, 100)
 		p.quite = make(chan struct{})
+		p.listener = map[string]func(task *store.Task){}
 
 		for {
 			select {
@@ -40,6 +46,10 @@ func (p *Pool) Run() {
 					}
 				}
 				fmt.Println("task finished", task.ID)
+
+				if callback := p.listener[task.Filename]; callback != nil {
+					go callback(task)
+				}
 			case <-p.quite:
 				fmt.Println("pool has stopped")
 				return
@@ -66,9 +76,13 @@ func (p *Pool) runTask(task *store.Task) (err error) {
 	case "pdf":
 		subCmds := fmt.Sprintf("%s -o %s", sourceFile, targetFile)
 		cmd = exec.Command("img2pdf", strings.Split(subCmds, " ")...)
+	default:
+		return
 	}
 
 	task.Command = cmd.String()
-	task.Output, err = cmd.CombinedOutput()
+	if !task.DryRun {
+		task.Output, err = cmd.CombinedOutput()
+	}
 	return
 }
