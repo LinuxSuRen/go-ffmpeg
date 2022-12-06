@@ -36,9 +36,6 @@ func TestPool(t *testing.T) {
 		format:       "mkv",
 		expectSubCmd: "ffmpeg",
 	}, {
-		format:       "pdf",
-		expectSubCmd: "img2pdf",
-	}, {
 		format:       "unknown",
 		expectSubCmd: "",
 	}}

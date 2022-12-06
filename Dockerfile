@@ -14,7 +14,7 @@ FROM ubuntu:20.04
 #COPY --from=builder /ws/sources.list /etc/apt/sources.list
 
 RUN apt update -y && \
-    apt install -y ffmpeg img2pdf
+    apt install -y ffmpeg
 
 COPY --from=builder /ws/go-ffmpeg /go-ffmpeg
 COPY --from=builder /ws/index.html /index.html

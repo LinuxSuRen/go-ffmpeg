@@ -60,7 +60,7 @@ func (p *Pool) Run() {
 
 func (p *Pool) runTask(task *store.Task) (err error) {
 	sourceFile := task.Filename
-	targetFile := strings.ReplaceAll(sourceFile, path.Ext(sourceFile), task.TargetFormat)
+	targetFile := strings.ReplaceAll(sourceFile, path.Ext(sourceFile), "."+task.TargetFormat)
 
 	task.TargetFile = targetFile
 	if sourceFile == "" || task.TargetFormat == "" {
@@ -73,9 +73,6 @@ func (p *Pool) runTask(task *store.Task) (err error) {
 	case "mp3", "mp4", "mkv", "wav":
 		subCmds := fmt.Sprintf("-i %s -hide_banner -acodec libmp3lame -ab 256k %s -y", sourceFile, targetFile)
 		cmd = exec.Command("ffmpeg", strings.Split(subCmds, " ")...)
-	case "pdf":
-		subCmds := fmt.Sprintf("%s -o %s", sourceFile, targetFile)
-		cmd = exec.Command("img2pdf", strings.Split(subCmds, " ")...)
 	default:
 		return
 	}
