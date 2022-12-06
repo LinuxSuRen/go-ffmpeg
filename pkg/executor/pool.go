@@ -58,6 +58,7 @@ func (p *Pool) Run() {
 	})
 }
 
+// read more from https://github.com/Onelinerhub/onelinerhub/tree/main/ffmpeg
 func (p *Pool) runTask(task *store.Task) (err error) {
 	sourceFile := task.Filename
 	targetFile := strings.ReplaceAll(sourceFile, path.Ext(sourceFile), "."+task.TargetFormat)
@@ -71,8 +72,31 @@ func (p *Pool) runTask(task *store.Task) (err error) {
 	var cmd *exec.Cmd
 	switch task.TargetFormat {
 	case "mp3", "mp4", "mkv", "wav":
-		subCmds := fmt.Sprintf("-i %s -hide_banner -acodec libmp3lame -ab 256k %s -y", sourceFile, targetFile)
-		cmd = exec.Command("ffmpeg", strings.Split(subCmds, " ")...)
+		flags := strings.Split(fmt.Sprintf("-i %s -hide_banner -ab 256k -y", sourceFile), " ")
+		if task.BeginTime != "" && task.EndTime != "" {
+			flags = append(flags, []string{"-ss", task.BeginTime}...)
+			flags = append(flags, []string{"-to", task.EndTime}...)
+		}
+		if task.TargetFormat == "mp3" {
+			flags = append(flags, []string{"-acodec", "libmp3lame"}...)
+		}
+		if task.TargetFormat == "mp4" || task.TargetFormat == "mkv" {
+			//flags = append(flags, []string{"-c:v", "copy"}...)
+
+			//flags = append(flags, []string{"-vf", `drawtext=text='this':x=100:y=50:fontsize=64:box=1`}...)
+
+			//-i sample.png -filter_complex [0:v][1:v]overlay=0:0
+			//flags = append(flags, []string{"-vf", `"drawtext=timecode='00:00:00:00':r=30:x=10:y=10:fontsize=24:fontcolor=white"`}...)
+
+			if task.TargetWidth != 0 && task.TargetHeight != 0 {
+				flags = append(flags, []string{"-vf", fmt.Sprintf("scale=%d:%d,setsar=1:1", task.TargetWidth, task.TargetHeight)}...)
+			}
+		}
+		flags = append(flags, targetFile)
+		cmd = exec.Command("ffmpeg", flags...)
+
+		infoData, _ := exec.Command("ffmpeg", "-i", sourceFile, "-hide_banner").CombinedOutput()
+		task.Info = string(infoData)
 	default:
 		return
 	}

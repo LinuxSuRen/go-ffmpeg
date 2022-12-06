@@ -50,6 +50,10 @@ func TestPool(t *testing.T) {
 			DryRun:       true,
 			Filename:     tt.format,
 			TargetFormat: tt.format,
+			TargetWidth:  -1,
+			TargetHeight: -1,
+			BeginTime:    "00:00:00",
+			EndTime:      "00:00:00",
 		})
 	}
 	time.Sleep(2 * time.Second)
