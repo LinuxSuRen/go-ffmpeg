@@ -3,6 +3,7 @@ package executor
 import (
 	"fmt"
 	"github.com/linuxsuren/go-ffmpeg/pkg/store"
+	"os"
 	"os/exec"
 	"path"
 	"strings"
@@ -61,7 +62,12 @@ func (p *Pool) Run() {
 // read more from https://github.com/Onelinerhub/onelinerhub/tree/main/ffmpeg
 func (p *Pool) runTask(task *store.Task) (err error) {
 	sourceFile := task.Filename
-	targetFile := strings.ReplaceAll(sourceFile, path.Ext(sourceFile), "."+task.TargetFormat)
+	targetFile := path.Join("output", strings.ReplaceAll(sourceFile, path.Ext(sourceFile), "."+task.TargetFormat))
+
+	// make sure the directory exists
+	if err = os.MkdirAll(path.Dir(targetFile), 0644); err != nil {
+		return
+	}
 
 	task.TargetFile = targetFile
 	if sourceFile == "" || task.TargetFormat == "" {
@@ -72,13 +78,17 @@ func (p *Pool) runTask(task *store.Task) (err error) {
 	var cmd *exec.Cmd
 	switch task.TargetFormat {
 	case "mp3", "mp4", "mkv", "wav":
-		flags := strings.Split(fmt.Sprintf("-i %s -hide_banner -ab 256k -y", sourceFile), " ")
+		flags := strings.Split(fmt.Sprintf("-i %s -hide_banner -y", sourceFile), " ")
 		if task.BeginTime != "" && task.EndTime != "" {
 			flags = append(flags, []string{"-ss", task.BeginTime}...)
 			flags = append(flags, []string{"-to", task.EndTime}...)
 		}
 		if task.TargetFormat == "mp3" {
 			flags = append(flags, []string{"-acodec", "libmp3lame"}...)
+
+			if task.AudioBitrate > 0 {
+				flags = append(flags, []string{"-b:a", fmt.Sprintf("%dk", task.AudioBitrate)}...)
+			}
 		}
 		if task.TargetFormat == "mp4" || task.TargetFormat == "mkv" {
 			//flags = append(flags, []string{"-c:v", "copy"}...)
@@ -95,7 +105,7 @@ func (p *Pool) runTask(task *store.Task) (err error) {
 		flags = append(flags, targetFile)
 		cmd = exec.Command("ffmpeg", flags...)
 
-		infoData, _ := exec.Command("ffmpeg", "-i", sourceFile, "-hide_banner").CombinedOutput()
+		infoData, _ := exec.Command("ffmpeg", "-i", sourceFile, "-hide_banner").Output()
 		task.Info = string(infoData)
 	default:
 		return
@@ -103,7 +113,12 @@ func (p *Pool) runTask(task *store.Task) (err error) {
 
 	task.Command = cmd.String()
 	if !task.DryRun {
-		task.Output, err = cmd.CombinedOutput()
+		var data []byte
+		if data, err = cmd.CombinedOutput(); err != nil {
+			task.ErrOutput = err.Error()
+		} else {
+			task.Output = string(data)
+		}
 	}
 	return
 }

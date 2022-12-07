@@ -54,6 +54,7 @@ func TestPool(t *testing.T) {
 			TargetHeight: -1,
 			BeginTime:    "00:00:00",
 			EndTime:      "00:00:00",
+			AudioBitrate: 128,
 		})
 	}
 	time.Sleep(2 * time.Second)

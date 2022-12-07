@@ -11,8 +11,10 @@ type Task struct {
 	TargetFile   string
 	BeginTime    string
 	EndTime      string
+	AudioBitrate int
 	Command      string
-	Output       []byte
+	Output       string
+	ErrOutput    string
 	Retry        int
 	DryRun       bool
 }
