@@ -55,6 +55,9 @@ func TestPool(t *testing.T) {
 			BeginTime:    "00:00:00",
 			EndTime:      "00:00:00",
 			AudioBitrate: 128,
+			Metadata: map[string]string{
+				"key": "value",
+			},
 		})
 	}
 	time.Sleep(2 * time.Second)

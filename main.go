@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var pool *executor.Pool
@@ -75,10 +76,18 @@ func upload(req *restful.Request, resp *restful.Response) {
 		TargetFormat: format,
 		BeginTime:    r.FormValue("beginTime"),
 		EndTime:      r.FormValue("endTime"),
+		Metadata:     map[string]string{},
 	}
 	task.TargetWidth, _ = strconv.Atoi(r.FormValue("width"))
 	task.TargetHeight, _ = strconv.Atoi(r.FormValue("height"))
 	task.AudioBitrate, _ = strconv.Atoi(r.FormValue("audioBitrate"))
+	// parse the metadata
+	metadataRaw := r.FormValue("metadata")
+	for _, item := range strings.Split(metadataRaw, ";") {
+		if sep := strings.Split(item, "="); len(sep) == 2 {
+			task.Metadata[sep[0]] = sep[1]
+		}
+	}
 
 	id := simpleStore.Save(task)
 	pool.Submit(task)

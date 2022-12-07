@@ -64,11 +64,6 @@ func (p *Pool) runTask(task *store.Task) (err error) {
 	sourceFile := task.Filename
 	targetFile := path.Join("output", strings.ReplaceAll(sourceFile, path.Ext(sourceFile), "."+task.TargetFormat))
 
-	// make sure the directory exists
-	if err = os.MkdirAll(path.Dir(targetFile), 0644); err != nil {
-		return
-	}
-
 	task.TargetFile = targetFile
 	if sourceFile == "" || task.TargetFormat == "" {
 		err = fmt.Errorf("source file or target format is missing")
@@ -102,6 +97,9 @@ func (p *Pool) runTask(task *store.Task) (err error) {
 				flags = append(flags, []string{"-vf", fmt.Sprintf("scale=%d:%d,setsar=1:1", task.TargetWidth, task.TargetHeight)}...)
 			}
 		}
+		for k, v := range task.Metadata {
+			flags = append(flags, []string{"-metadata", fmt.Sprintf("%s=%s", k, v)}...)
+		}
 		flags = append(flags, targetFile)
 		cmd = exec.Command("ffmpeg", flags...)
 
@@ -113,6 +111,11 @@ func (p *Pool) runTask(task *store.Task) (err error) {
 
 	task.Command = cmd.String()
 	if !task.DryRun {
+		// make sure the directory exists
+		if err = os.MkdirAll(path.Dir(targetFile), 0644); err != nil {
+			return
+		}
+
 		var data []byte
 		if data, err = cmd.CombinedOutput(); err != nil {
 			task.ErrOutput = err.Error()
