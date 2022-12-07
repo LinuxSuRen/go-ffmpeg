@@ -16,8 +16,9 @@
     <h2>Common</h2>
 From: <input name="beginTime" id="beginTime" placeholder="00:00:00"/>
 End: <input name="endTime" id="endTime" placeholder="00:00:00"/>
+<br/>
+    Metadata: <textarea id="metadata" placeholder="track=1;publisher=publisher;comment=comment"></textarea>
 <div/>
-
 <br/>
 
 <div>
@@ -47,6 +48,7 @@ Height: <input id="height" value="0"/>
         let width = document.getElementById("width").value;
         let height = document.getElementById("height").value;
         let audioBitrate = document.getElementById("audioBitrate").value;
+        let metadata = document.getElementById("metadata").value;
         let formData = new FormData();
 
         formData.append("file", fileupload.files[0]);
@@ -56,6 +58,7 @@ Height: <input id="height" value="0"/>
         formData.append("width", width)
         formData.append("height", height)
         formData.append("audioBitrate", audioBitrate)
+        formData.append("metadata", metadata)
         const resp = await fetch('/upload', {
             method: "POST",
             body: formData

@@ -9,6 +9,7 @@ type Task struct {
 	TargetWidth  int
 	TargetHeight int
 	TargetFile   string
+	Metadata     map[string]string
 	BeginTime    string
 	EndTime      string
 	AudioBitrate int
