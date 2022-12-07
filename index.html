@@ -12,12 +12,24 @@
 </select>
 
 <br/>
+<div>
+    <h2>Common</h2>
 From: <input name="beginTime" id="beginTime" placeholder="00:00:00"/>
 End: <input name="endTime" id="endTime" placeholder="00:00:00"/>
+<div/>
 
 <br/>
+
+<div>
+    <h2>Audio</h2>
+Bitrate: <input id="audioBitrate" placeholder="128"/>
+</div>
+
+<div>
+    <h2>Video</h2>
 Width: <input id="width" value="0"/>
 Height: <input id="height" value="0"/>
+</div>
 
 <br/>
 <button id="upload-button" onclick="uploadFile()"> Convert </button>
@@ -34,6 +46,7 @@ Height: <input id="height" value="0"/>
         let endTime = document.getElementById("endTime").value;
         let width = document.getElementById("width").value;
         let height = document.getElementById("height").value;
+        let audioBitrate = document.getElementById("audioBitrate").value;
         let formData = new FormData();
 
         formData.append("file", fileupload.files[0]);
@@ -42,6 +55,7 @@ Height: <input id="height" value="0"/>
         formData.append("endTime", endTime)
         formData.append("width", width)
         formData.append("height", height)
+        formData.append("audioBitrate", audioBitrate)
         const resp = await fetch('/upload', {
             method: "POST",
             body: formData
@@ -63,8 +77,10 @@ Height: <input id="height" value="0"/>
                         window.location = '/download?file=' + out.TargetFile
                     }
                     document.getElementById('download').append(but)
+                } else if (out.ErrOutput && out.ErrOutput !== "") {
+                    document.getElementById('status').innerText = out.ErrOutput
                 } else {
-                    document.getElementById('status').innerText = 'downloading'
+                    document.getElementById('status').innerText = 'converting'
                     window.setTimeout(queryTask, 2000, id)
                 }
                 document.getElementById('info').innerText = out.Info

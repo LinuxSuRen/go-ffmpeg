@@ -64,6 +64,7 @@ func upload(req *restful.Request, resp *restful.Response) {
 	file, header, _ := r.FormFile("file")
 
 	// source and target file
+	// TODO error handle is required, the POST request might be aborted
 	sourceFile := header.Filename
 
 	f, _ := os.OpenFile(sourceFile, os.O_WRONLY|os.O_CREATE, 0666)
@@ -77,6 +78,7 @@ func upload(req *restful.Request, resp *restful.Response) {
 	}
 	task.TargetWidth, _ = strconv.Atoi(r.FormValue("width"))
 	task.TargetHeight, _ = strconv.Atoi(r.FormValue("height"))
+	task.AudioBitrate, _ = strconv.Atoi(r.FormValue("audioBitrate"))
 
 	id := simpleStore.Save(task)
 	pool.Submit(task)
